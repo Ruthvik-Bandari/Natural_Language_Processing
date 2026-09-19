@@ -1,45 +1,129 @@
-# Natural Language Processing – Pizza Chatbot
+# Natural Language Processing — Pizza Ordering Chatbot
 
-A pizza ordering chatbot built with **ChatterBot** and a custom logic adapter.
+A conversational pizza-ordering assistant built on **ChatterBot** with a custom logic adapter that holds order state across turns. Coursework for AAI 6620, Assignment 6.
 
-## Project Overview
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
+![ChatterBot](https://img.shields.io/badge/ChatterBot-1.2.13-4B8BBE)
+![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626?logo=jupyter&logoColor=white)
 
-This project implements a conversational pizza assistant that can:
-- Display a pizza menu
-- Take specialty or custom pizza orders
-- Ask for pizza size and toppings
-- Collect delivery and payment details
-- Show order summaries
+## Contents
 
-## Repository Contents
+- [What it does](#what-it-does)
+- [How the adapter works](#how-the-adapter-works)
+- [Menu and pricing](#menu-and-pricing)
+- [Requirements](#requirements)
+- [How to run](#how-to-run)
+- [Example session](#example-session)
+- [Repository contents](#repository-contents)
+- [Limitations](#limitations)
+- [Author](#author)
 
-- `Assignment6_Chatbot.ipynb` – assignment notebook with setup and demo flow
-- `pizza_adapter.py` – custom `PizzaOrderLogicAdapter` implementation
-- `pizza_bot.sqlite3` – chatbot storage database
+## What it does
+
+- Displays the pizza menu on request, at any point in the conversation
+- Takes specialty or fully custom pizza orders
+- Prompts for size and toppings
+- Accumulates a multi-pizza order
+- Collects delivery and payment details
+- Prints a running order summary with an itemised total
+- Cancels and resets the order on request
+
+## How the adapter works
+
+`pizza_adapter.py` (528 lines) implements `PizzaOrderLogicAdapter`, a ChatterBot `LogicAdapter`.
+ChatterBot's default adapters are stateless corpus matchers, which cannot run an order, so this one
+adds two things:
+
+**Intent detection.** `_detect_intent()` classifies each utterance by keyword and pattern matching
+into one of: `start_order`, `custom_pizza`, `show_menu`, `toppings:<list>`, `summary`,
+`done_ordering`, `cancel`, `yes`, `no`. Topping detection returns every matched topping as a
+comma-joined payload rather than a single label, so "mushrooms and olives" is handled in one turn.
+
+**Order state.** The adapter keeps the in-progress order in module-level state, so `process()` knows
+which stage the conversation is at and what it still needs to ask for. `show_menu` is handled
+before the stage machine, so the menu is reachable mid-order without losing progress. A reset
+helper clears state, which is what makes the notebook re-runnable.
+
+`can_process()` gates the adapter so it only claims utterances it recognises, leaving anything else
+to ChatterBot's normal response selection.
+
+## Menu and pricing
+
+| Size | Price |
+|---|---|
+| Small | $8.99 |
+| Medium | $11.99 |
+| Large | $14.99 |
+
+Extra toppings beyond three add **$1.50** each.
+
+**Specialty pizzas (7):** Margherita, Pepperoni, Hawaiian, Veggie, Meat Lovers, BBQ Chicken, Supreme.
+
+**Available toppings (16):** pepperoni, sausage, mushrooms, onions, olives, bell peppers, bacon,
+ham, pineapple, jalapenos, extra cheese, tomatoes, grilled chicken, anchovies, fresh basil, spinach.
 
 ## Requirements
 
 - Python 3.10+
 - `chatterbot==1.2.13`
 
-Install dependency:
-
 ```bash
 pip install chatterbot==1.2.13
 ```
 
-## How to Run
+The pinned version matters: ChatterBot's adapter API changed across releases, and this adapter
+targets 1.2.x.
 
-1. Open and run the notebook:
-   - `Assignment6_Chatbot.ipynb`
-2. Ensure `pizza_adapter.py` is in the same project folder.
-3. Run cells in order to initialize and chat with the bot.
+## How to run
 
-## Notes
+1. Keep `pizza_adapter.py` in the same directory as the notebook.
+2. Open `Assignment6_Chatbot.ipynb`.
+3. Run the cells in order to build the chatbot and start a conversation.
 
-- SQLite WAL temporary files are generated automatically at runtime.
-- Keep your virtual environment and cache files out of version control.
+The chatbot persists its corpus in `pizza_bot.sqlite3`.
+
+## Example session
+
+```
+You:  show me the menu
+Bot:  Specialty pizzas:
+        Margherita    - mozzarella, tomato sauce, fresh basil
+        ...
+      Sizes and prices:
+        Small     $8.99
+        Medium    $11.99
+        Large     $14.99
+        (extra toppings beyond 3: +$1.50 each)
+
+You:  I'd like a large pepperoni
+Bot:  Added: Pepperoni (large) - mozzarella, pepperoni, tomato sauce -- $14.99
+      Anything else?
+
+You:  that's all
+Bot:  Order summary:
+        Pizza 1: Pepperoni (large) - ... -- $14.99
+      Total: $14.99
+```
+
+## Repository contents
+
+| File | Purpose |
+|---|---|
+| `Assignment6_Chatbot.ipynb` | Assignment notebook: setup, training and demo conversation |
+| `pizza_adapter.py` | `PizzaOrderLogicAdapter` — intent detection, order state, pricing |
+| `pizza_bot.sqlite3` | ChatterBot storage database |
+
+## Limitations
+
+- **Intent detection is keyword and pattern matching**, not a trained classifier. Phrasing outside
+  the expected patterns falls through to ChatterBot's generic responses.
+- **Order state is module-level**, so a single process serves one conversation. It is not safe for
+  concurrent users.
+- No payment processing or delivery integration; those details are collected but not acted on.
+- No automated tests.
+- SQLite WAL files are created at runtime and should stay out of version control.
 
 ## Author
 
-Ruthvik Bandari
+**Ruthvik Nath Bandari** — MS Applied AI, Northeastern University
+[GitHub](https://github.com/Ruthvik-Bandari) · [LinkedIn](https://www.linkedin.com/in/ruthvik-nath-bandari/)
