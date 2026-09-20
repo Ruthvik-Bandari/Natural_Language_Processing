@@ -80,7 +80,8 @@ targets 1.2.x.
 2. Open `Assignment6_Chatbot.ipynb`.
 3. Run the cells in order to build the chatbot and start a conversation.
 
-The chatbot persists its corpus in `pizza_bot.sqlite3`.
+The chatbot persists its corpus in `pizza_bot.sqlite3`, which is created on first run and is
+not tracked in git.
 
 ## Example session
 
@@ -111,7 +112,7 @@ Bot:  Order summary:
 |---|---|
 | `Assignment6_Chatbot.ipynb` | Assignment notebook: setup, training and demo conversation |
 | `pizza_adapter.py` | `PizzaOrderLogicAdapter` — intent detection, order state, pricing |
-| `pizza_bot.sqlite3` | ChatterBot storage database |
+| `pizza_bot.sqlite3` | ChatterBot storage, created on first run (not tracked) |
 
 ## Limitations
 
