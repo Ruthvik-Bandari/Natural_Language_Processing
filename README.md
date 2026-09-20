@@ -124,6 +124,10 @@ Bot:  Order summary:
 - No automated tests.
 - SQLite WAL files are created at runtime and should stay out of version control.
 
+## License
+
+[MIT](LICENSE) &copy; Ruthvik Nath Bandari
+
 ## Author
 
 **Ruthvik Nath Bandari** — MS Applied AI, Northeastern University
